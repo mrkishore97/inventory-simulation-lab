@@ -1,9 +1,8 @@
 # 📦 Inventory Twin
 
+[![CI](https://github.com/mrkishore97/inventory-simulation-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/mrkishore97/inventory-simulation-lab/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
-
-<!-- TODO: Add a CI status badge once the curated public repository is created. -->
 
 An interactive **inventory-policy simulator**. Configure a replenishment policy, a demand
 model, and a lead-time model; run a digital twin of the replenishment process; and measure
@@ -11,8 +10,8 @@ the service-level-versus-cost trade-off with Monte Carlo rigor.
 
 ![Inventory Twin](assets/front-page.png)
 
-> **Live demo:** coming after deployment.
-> **Walkthrough video:** coming after deployment.
+> **Live demo:** https://inventory-simulation-lab.streamlit.app
+> **Walkthrough video:** coming soon.
 
 ---
 
