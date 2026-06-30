@@ -1,0 +1,45 @@
+# Reference scenario — M5 archetype "slow-moving intermittent".
+# Reproduce: python -m inventory_twin.cli run --config data/scenarios/example_archetype_intermittent.yaml
+#
+# Empirical (IID resample) demand on a REAL Walmart M5 SKU curated as the
+# slow-moving-intermittent archetype (Syntetos-Boylan "intermittent" quadrant:
+# high ADI, low CV2 — many zero-demand days punctuated by small, similarly-sized
+# sales). Exact source SKU + computed metrics in data/m5/archetypes_manifest.json.
+#
+# ** IID-marginal caveat ** draw() = rng.choice(history) replays the SKU's
+# MARGINAL (a heavily zero-inflated histogram), NOT the run-length structure of
+# the zero gaps. The high zero-fraction is preserved; the clustering of demand
+# in time is not.
+#
+# Shares the (s,Q) fixture of example.yaml so the M5 cost axis varies only the
+# demand source. EXPECT a poor policy fit: (s=20, Q=30) is tuned for ~mean-10
+# demand, but a slow-mover's mean is far lower, so the policy over-orders and
+# parks inventory — large holding cost relative to throughput. That mismatch is
+# the lesson (slow/intermittent SKUs need their own policy parameters).
+#
+# Path resolved relative to CWD (run from repo root). Hash includes history_path
+# but not file contents; treat the bundled parquet as immutable.
+name: m2-bullet16-archetype-intermittent
+notes: Real M5 slow-moving-intermittent archetype (SB intermittent quadrant), IID-resampled. Exact source SKU in data/m5/archetypes_manifest.json. Fixed (s,Q) is intentionally mismatched to expose the slow-mover policy-fit lesson. The shared (s, Q) = (20, 30) baseline is untuned, so its cost is illustrative rather than representative — tune with the Policy Advisor or Pareto Explorer.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: empirical
+  history_path: data/m5/archetype_intermittent.parquet
+lead_time:
+  kind: deterministic
+  lead_time: 3
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

@@ -1,0 +1,33 @@
+# EOQ validation anchor.
+# Deterministic demand D=10.3, ordering cost K=20, holding cost h=1
+#   => EOQ = sqrt(2*D*K/h) = sqrt(2*10.3*20/1) = 20.30  ->  round(EOQ) = 20.
+# Demand is non-integer on purpose: an exactly-integer rate makes the
+# deterministic sawtooth resonate with the integer period grid, spiking cost at
+# round order quantities. tests/validation/test_eoq.py sweeps order_quantity
+# through the engine and confirms the cost-minimizing Q matches this EOQ; this
+# scenario is its anchor point (order_quantity = 20).
+name: eoq-validation
+notes: Deterministic-demand (s,Q) at the analytical EOQ (Q=20) — §11 validation anchor.
+master_seed: 42
+simulation:
+  horizon: 365
+  initial_on_hand: 60
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: normal
+  mean: 10.3
+  std: 0.0
+lead_time:
+  kind: deterministic
+  lead_time: 1
+policy:
+  kind: sQ
+  reorder_point: 50.0
+  order_quantity: 20
+costs:
+  unit_cost: 0.0
+  holding_per_unit_per_period: 1.0
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 100.0
+  lost_sale_per_unit: 0.0

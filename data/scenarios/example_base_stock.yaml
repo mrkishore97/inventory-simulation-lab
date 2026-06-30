@@ -1,0 +1,26 @@
+# Reference base-stock (order-up-to-S) policy config.
+# Reproduces with: python -m inventory_twin.cli run --config data/scenarios/example_base_stock.yaml
+name: m2-base-stock-baseline
+notes: Reference base-stock baseline — 90-period horizon, deterministic lead time, single target_level parameter.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: normal
+  mean: 10.0
+  std: 2.0
+lead_time:
+  kind: deterministic
+  lead_time: 3
+policy:
+  kind: base_stock
+  target_level: 60.0
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

@@ -1,0 +1,39 @@
+# Disruption-channel demonstration scenario.
+# Identical to example.yaml (deterministic lead time L=3) except for a single
+# scheduled lead-time disruption: orders placed in periods [30, 60) have their
+# lead time multiplied by 2.0 -> effective L = round_to_periods(3 * 2.0) = 6.
+# Replenishments placed during the window arrive 6 periods later instead of 3,
+# delaying recovery and raising backorder cost above the $5,562.05 baseline.
+# Reproduces with:
+#   python -m inventory_twin.cli run --config data/scenarios/example_disruption.yaml
+name: m2-disruption-demo
+notes: Reference (s,Q) baseline with a scheduled x2 lead-time disruption over periods 30-59.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: normal
+  mean: 10.0
+  std: 2.0
+lead_time:
+  kind: deterministic
+  lead_time: 3
+disruption:
+  kind: scheduled
+  windows:
+    - start: 30
+      duration: 30
+      multiplier: 2.0
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

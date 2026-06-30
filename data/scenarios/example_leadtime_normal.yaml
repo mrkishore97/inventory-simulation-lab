@@ -1,0 +1,43 @@
+# Reference scenario — Normal (stochastic) lead time.
+# Reproduce: python -m inventory_twin.cli run --config data/scenarios/example_leadtime_normal.yaml
+#
+# Identical to example.yaml (the deterministic-lead-time-3 baseline, cost
+# $5,562.05) EXCEPT the lead time is now stochastic: each order's arrival delay
+# is drawn from Normal(mean=3, std=1), rounded to the nearest whole period and
+# clipped to >= 1 — i.e. arrival_t = t + max(1, round(N(3, 1))). Realized lead
+# times are mostly {2, 3, 4} periods, varying per order. This is the first arm
+# that consumes the seeded "lead_time" RNG stream (deterministic lead time never
+# draws), so the demand stream is unchanged but the order-arrival timing now
+# varies run-to-run with the master seed.
+#
+# Expected cost behavior vs the deterministic-L3 baseline: lead-time variability
+# adds replenishment risk (some orders arrive late), so total cost is typically
+# somewhat higher than $5,562.05. The exact value is observed as
+# the first datapoint on the lead-time cost axis; it is not asserted in tests
+# (same convention as the distribution / pattern / M5 axes).
+name: m2-bullet19-leadtime-normal
+notes: Normal(mean=3, std=1) stochastic lead time on the (s,Q) baseline. Per-order delay = max(1, round(N(3,1))). First RNG-consuming lead-time arm; demand stream unchanged.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: normal
+  mean: 10.0
+  std: 2.0
+lead_time:
+  kind: normal
+  mean: 3.0
+  std: 1.0
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

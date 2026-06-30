@@ -1,0 +1,27 @@
+# Reference (R,S) periodic-review policy config.
+# Reproduces with: python -m inventory_twin.cli run --config data/scenarios/example_RS.yaml
+name: m2-RS-baseline
+notes: Reference (R,S) baseline — 90-period horizon, weekly review (R=7), order-up-to S=60.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: normal
+  mean: 10.0
+  std: 2.0
+lead_time:
+  kind: deterministic
+  lead_time: 3
+policy:
+  kind: RS
+  review_period: 7
+  order_up_to: 60.0
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

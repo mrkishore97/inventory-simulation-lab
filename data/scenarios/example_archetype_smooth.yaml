@@ -1,0 +1,50 @@
+# Reference scenario — M5 archetype "fast-moving smooth".
+# Reproduce: python -m inventory_twin.cli run --config data/scenarios/example_archetype_smooth.yaml
+#
+# Empirical (IID resample) demand on a REAL Walmart M5 SKU curated as the
+# fast-moving-smooth archetype (Syntetos-Boylan "smooth" quadrant: low ADI,
+# low CV2 — frequent, regular demand). The exact source SKU (item_id /
+# store_id / category) and its computed ADI/CV2/SB-quadrant are recorded in
+# data/m5/archetypes_manifest.json. The history file is produced by
+# scripts/extract_m5_archetypes.py from the raw M5 competition data.
+#
+# ** IID-marginal caveat ** EmpiricalDemand.draw() returns rng.choice(history),
+# so this scenario replays the SKU's MARGINAL demand distribution (its level
+# histogram), NOT its temporal ordering. For a smooth SKU the marginal is the
+# salient feature, so IID replay is faithful here. In-time seasonality/trend is
+# the orthogonal Pattern axis (compose a SeasonalPattern/TrendingPattern on top
+# for temporal effects).
+#
+# Shares the (s,Q) fixture of example.yaml / example_m5_smooth.yaml so the
+# cost-ranking "M5 axis" varies only the demand source across the 4 archetypes.
+# Note: a real SKU's demand scale may differ from the mean-10 synthetic
+# fixtures, so the fixed (s,Q) policy may be a poor fit — that mismatch is the
+# pedagogical point (one policy does not suit every archetype).
+#
+# Path is resolved relative to CWD (run from the repo root). The config hash
+# includes history_path but NOT the file contents — treat the bundled parquet
+# as an immutable artifact (see archetypes_manifest.json provenance).
+name: m2-bullet16-archetype-smooth
+notes: Real M5 fast-moving-smooth archetype (SB smooth quadrant), IID-resampled. Exact source SKU in data/m5/archetypes_manifest.json. IID replay preserves the marginal, not the temporal pattern. Note — the fixed (s, Q) = (20, 30) here is a shared demonstration baseline (it varies only the demand source across the four archetypes), NOT tuned to this SKU, so the cost is illustrative rather than representative. This fast-moving ~131/period SKU is the extreme case — the baseline reorders almost every period and barely fills. Tune with the Policy Advisor or Pareto Explorer.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: empirical
+  history_path: data/m5/archetype_smooth.parquet
+lead_time:
+  kind: deterministic
+  lead_time: 3
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

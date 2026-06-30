@@ -1,0 +1,31 @@
+# Newsvendor validation anchor — CLOSES M2.
+# Newsvendor order-up-to level for Normal demand μ=100, σ=20 at a 90% critical
+# ratio (underage Cu=9, overage Co=1 → Cu/(Cu+Co)=0.9):
+#   S* = μ + Φ⁻¹(0.9)·σ = 100 + 1.2816·20 ≈ 125.6  →  target_level 126.
+# tests/validation/test_newsvendor.py validates the *single-period* critical
+# ratio (1-period episodes; no-stockout fraction ≈ Cu/(Cu+Co)). This scenario is
+# a *multi-period* base-stock demo at that level — cost recorded, not asserted.
+name: newsvendor-validation
+notes: Base-stock at the 90% newsvendor critical-ratio level (S*≈126) — §11 validation anchor.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 126
+  initial_on_order: 0
+  backorder_policy: lost_sales
+demand:
+  kind: normal
+  mean: 100.0
+  std: 20.0
+lead_time:
+  kind: deterministic
+  lead_time: 1
+policy:
+  kind: base_stock
+  target_level: 126.0
+costs:
+  unit_cost: 0.0
+  holding_per_unit_per_period: 1.0
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 0.0
+  lost_sale_per_unit: 9.0

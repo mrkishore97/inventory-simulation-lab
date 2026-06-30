@@ -1,0 +1,27 @@
+# Reference Gamma-demand scenario.
+# Reproduces with: python -m inventory_twin.cli run --config data/scenarios/example_gamma.yaml
+name: m2-gamma-baseline
+notes: Reference Gamma(shape=5, scale=2) demand baseline — first continuous-support demand arm (mean=10, variance=20). Matches Normal mean=10, Poisson rate=10, NegBin n=10/p=0.5 mean=10 for cost-comparison parity; variance is identical to NegBin's 20, deliberately matched to isolate the integer-vs-continuous shape effect at fixed first two moments.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: gamma
+  shape: 5.0
+  scale: 2.0
+lead_time:
+  kind: deterministic
+  lead_time: 3
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

@@ -1,0 +1,47 @@
+# Built-in stress scenario — Seasonal Shock.
+# Same world as example.yaml ($5,562.05 baseline) plus a strong seasonal demand
+# pattern modeling the "holiday-pattern demand". This is a demand-side
+# stress the current pattern system CAN express (a multiplicative seasonal
+# overlay), unlike the deferred rectangular demand-window scenarios
+# (demand_surge / demand_collapse / recovery_test), which need a future
+# demand-disruption overlay and are NOT shipped here.
+#
+# Sinusoidal seasonality: factor(t) = 1 + 0.7 * sin(2*pi*t / 30)
+#   factor range [0.3, 1.7] -> demand swings ~3 to ~17 around the base mean 10,
+#   with ~3 broad holiday humps over the 90-period horizon.
+# This is a pronounced SHOCK (amplitude 0.7), distinct from the gentle
+# example_pattern_seasonal.yaml demo (amplitude 0.5, period 12). The (s,Q) policy
+# sized for steady mean-10 demand under-orders at the peaks (stockouts) and
+# over-orders in the troughs (excess holding).
+# Reproduces with:
+#   python -m inventory_twin.cli run --config data/scenarios/seasonal_shock.yaml
+name: stress-seasonal-shock
+notes: Strong seasonal demand shock (amplitude 0.7, period 30) on the (s,Q) baseline — holiday-pattern demand. The §5.5 "seasonal shock" stress test.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: normal
+  mean: 10.0
+  std: 2.0
+pattern:
+  kind: seasonal
+  amplitude: 0.7
+  period: 30
+  phase: 0.0
+lead_time:
+  kind: deterministic
+  lead_time: 3
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

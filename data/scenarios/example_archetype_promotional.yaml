@@ -1,0 +1,46 @@
+# Reference scenario — M5 archetype "promotional-driven".
+# Reproduce: python -m inventory_twin.cli run --config data/scenarios/example_archetype_promotional.yaml
+#
+# Empirical (IID resample) demand on a REAL Walmart M5 SKU curated as the
+# promotional-driven archetype (selected by max promo-intensity = price-discount
+# frequency x demand lift, computed from sell_prices.csv + calendar.csv). Exact
+# source SKU + its promo-intensity and SB quadrant are in
+# data/m5/archetypes_manifest.json. (Promo-driven demand typically lands in the
+# SB erratic/lumpy quadrants; the actual quadrant is recorded, not assumed.)
+#
+# ** IID-marginal caveat — IMPORTANT for this archetype ** draw() =
+# rng.choice(history) scatters the promo-driven spikes RANDOMLY in time: this
+# scenario replays the SKU's MARGINAL (a histogram with occasional high values),
+# NOT the promotion calendar. The spike magnitudes survive; their timing does
+# not. Modelling promotions in-time is future work (a promo Pattern / event
+# channel), out of scope for the marginal-replay archetype library.
+#
+# Shares the (s,Q) fixture of example.yaml so the M5 cost axis varies only the
+# demand source. Real demand scale may differ from the mean-10 fixtures.
+#
+# Path resolved relative to CWD (run from repo root). Hash includes history_path
+# but not file contents; treat the bundled parquet as immutable.
+name: m2-bullet16-archetype-promotional
+notes: Real M5 promotional-driven archetype (selected by price-discount-driven demand lift; SB quadrant recorded in manifest), IID-resampled. IID replay keeps the spike magnitudes' marginal but scatters their timing. The shared (s, Q) = (20, 30) baseline is untuned, so its cost is illustrative rather than representative — tune with the Policy Advisor or Pareto Explorer.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: empirical
+  history_path: data/m5/archetype_promotional.parquet
+lead_time:
+  kind: deterministic
+  lead_time: 3
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

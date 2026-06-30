@@ -1,0 +1,26 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.env
+dist/
+build/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.parquet
+# Ignore the M5 cache directory's contents (the full opt-in dataset and the raw
+# competition CSVs in data/m5/raw/ are large and never committed), but re-include
+# the curated artifacts that ship with the app: the Bullet 15
+# synthetic chassis sample, the Bullet 16 real-archetype parquets, and their
+# provenance manifest. The negations work because we exclude the directory's
+# contents (data/m5/*) rather than the directory itself; data/m5/raw/ is a
+# sub-directory that stays excluded (no negation re-includes it).
+data/m5/*
+!data/m5/sample_smooth.parquet
+!data/m5/archetype_*.parquet
+!data/m5/archetypes_manifest.json

@@ -1,0 +1,27 @@
+# Reference Negative-Binomial-demand scenario.
+# Reproduces with: python -m inventory_twin.cli run --config data/scenarios/example_negative_binomial.yaml
+name: m2-negative-binomial-baseline
+notes: Reference NegBin(n=10, p=0.5) demand baseline — over-dispersed integer demand (mean=10, variance=20). Matches Normal mean=10 and Poisson rate=10 for cost-comparison parity; variance is 2× Poisson's and 5× Normal's, demonstrating the variance-cost relationship pedagogically.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: negative_binomial
+  n: 10.0
+  p: 0.5
+lead_time:
+  kind: deterministic
+  lead_time: 3
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

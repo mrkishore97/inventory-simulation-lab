@@ -1,0 +1,40 @@
+# Built-in stress scenario — Lead-Time Spike.
+# Same world as example.yaml ($5,562.05 baseline) plus a single scheduled
+# lead-time disruption: orders placed in periods [30, 58) have their lead time
+# tripled — effective L = round_to_periods(3 * 3.0) = 9 — modeling the
+# "lead time triples for a 4-week window" (28 periods ~= 4 weeks). Replenishments
+# placed during the window arrive 9 periods later instead of 3, delaying recovery
+# and raising backorder cost above the baseline.
+# Reproduces with:
+#   python -m inventory_twin.cli run --config data/scenarios/lead_time_spike.yaml
+name: stress-lead-time-spike
+notes: Scheduled x3 lead-time spike (L=3 -> 9) over periods 30-57 on the (s,Q) baseline. The §5.5 "lead-time spike" stress test.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: normal
+  mean: 10.0
+  std: 2.0
+lead_time:
+  kind: deterministic
+  lead_time: 3
+disruption:
+  kind: scheduled
+  windows:
+    - start: 30
+      duration: 28
+      multiplier: 3.0
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

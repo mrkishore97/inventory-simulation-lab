@@ -1,0 +1,12 @@
+# Streamlit app configuration (read from CWD = repo root when run as
+# `streamlit run ui/app.py`). dark mode by default.
+[theme]
+base = "dark"
+
+[server]
+# Don't try to open a browser / prompt for an email on first launch — keeps local
+# runs and CI/headless environments quiet. The deploy target sets its own server opts.
+headless = true
+
+[browser]
+gatherUsageStats = false

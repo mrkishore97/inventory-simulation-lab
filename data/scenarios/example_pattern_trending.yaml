@@ -1,0 +1,54 @@
+# Reference Trending pattern scenario.
+# Reproduces with: python -m inventory_twin.cli run --config data/scenarios/example_pattern_trending.yaml
+#
+# Linear-multiplicative positive trend on top of the Normal demand baseline:
+#   factor(t) = 1 + 0.02 * t
+#   demand(t) = max(0, base(t) * factor(t))  where base(t) ~ Normal(10, 2)
+#
+# Factor range over horizon=90:
+#   t=0  → factor = 1.00 (demand ≈ 10)
+#   t=44 → factor = 1.88 (demand ≈ 18.8)
+#   t=89 → factor = 2.78 (demand ≈ 27.8)
+# Late-horizon mean is ~2.8× the early-horizon mean — monotone growth of
+# 178% over the 90-period horizon. Clip never activates at positive slope.
+#
+# Expected cost behavior vs example.yaml ($5,562.05 Stationary baseline)
+# and vs example_pattern_seasonal.yaml ($6,060.51 Seasonal observation):
+# significantly higher cost than both. The (s,Q) policy at reorder_point=20,
+# order_quantity=30 was sized for the t=0 marginal demand (mean=10, std=2).
+# As demand grows linearly toward 28, the fixed reorder point becomes
+# progressively under-sized — the gap between consumption rate and reorder
+# triggers widens, accumulating stockout costs that COMPOUND monotonically
+# rather than averaging out over a cycle (the seasonal mismatch is
+# oscillatory; the trending mismatch is monotone). Canonical M2 teaching:
+# policy parameters tuned to the marginal demand distribution can be
+# wrong-by-significant-margins for the time-conditional demand process.
+# The actual measured cost is observed.
+name: m2-pattern-trending-baseline
+notes: Linear-multiplicative positive trend (slope=0.02) on Normal(10, 2) base. Monotone growth from factor 1.0 at t=0 to 2.78 at t=89. Canonical (s,Q) policy mismatch with compounding stockout costs.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: normal
+  mean: 10.0
+  std: 2.0
+pattern:
+  kind: trending
+  slope: 0.02
+lead_time:
+  kind: deterministic
+  lead_time: 3
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

@@ -1,0 +1,32 @@
+# Safety-stock validation anchor.
+# Normal demand μ=10, σ=3, lead time L=4. The reorder point is provisioned for a
+# 95% cycle service level:
+#   s = μL + z·σ·√L = 10·4 + Φ⁻¹(0.95)·3·√4 = 40 + 1.6449·6 ≈ 49.87.
+# tests/validation/test_safety_stock.py confirms that raising the target service
+# level (hence z, hence s) raises the achieved cycle service level; this scenario
+# is the 95%-service anchor of that sweep. Stochastic — recorded, never asserted.
+name: safety-stock-validation
+notes: Normal-demand (s,Q) provisioned for 95% cycle service — §11 validation anchor.
+master_seed: 42
+simulation:
+  horizon: 730
+  initial_on_hand: 80
+  initial_on_order: 0
+  backorder_policy: lost_sales
+demand:
+  kind: normal
+  mean: 10.0
+  std: 3.0
+lead_time:
+  kind: deterministic
+  lead_time: 4
+policy:
+  kind: sQ
+  reorder_point: 49.87
+  order_quantity: 40
+costs:
+  unit_cost: 0.0
+  holding_per_unit_per_period: 1.0
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 0.0
+  lost_sale_per_unit: 10.0

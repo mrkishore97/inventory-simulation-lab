@@ -1,0 +1,27 @@
+# Reference config for the M1 CLI deliverable.
+# Reproduces with: python -m inventory_twin.cli run --config data/scenarios/example.yaml
+name: m1-baseline
+notes: Reference (s,Q) baseline — 90-period horizon, deterministic lead time.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: normal
+  mean: 10.0
+  std: 2.0
+lead_time:
+  kind: deterministic
+  lead_time: 3
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

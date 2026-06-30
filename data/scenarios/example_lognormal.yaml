@@ -1,0 +1,40 @@
+# Reference Lognormal-demand scenario.
+# Reproduces with: python -m inventory_twin.cli run --config data/scenarios/example_lognormal.yaml
+#
+# Parameter derivation (target: mean=10, variance=20 — matches NegBin and Gamma):
+#   variance/mean² = exp(sigma²) − 1 = 20/100 = 0.20
+#   sigma² = ln(1.20) ≈ 0.18232  →  sigma ≈ 0.4271
+#   mu = ln(10) − sigma²/2 ≈ 2.30259 − 0.09116 ≈ 2.2114
+#
+# Resulting moments (at the rounded values):
+#   mean     = exp(2.2114 + 0.4271²/2) = exp(2.30261) ≈ 10.00
+#   variance = (exp(0.18241) − 1) × exp(4.60521) ≈ 20.01
+#
+# IMPORTANT (parameter-naming foot-gun): ``mu`` and ``sigma`` are
+# parameters of the *underlying* log-Normal — they are NOT the moments
+# of the resulting Lognormal demand. See LognormalDemandConfig docstring.
+name: m2-lognormal-baseline
+notes: Reference Lognormal(mu=2.2114, sigma=0.4271) demand — second continuous-support arm, final M2 demand quartet bullet. Moments solve to mean≈10 / variance≈20, matching NegBin(n=10,p=0.5) and Gamma(shape=5,scale=2) for cost-comparison parity. The 5-row cost-ranking artifact isolates integer-vs-continuous AND tail-decay shape at fixed first two moments (Lognormal's sub-exponential right tail is heavier than Gamma's at matched variance).
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: lognormal
+  mu: 2.2114
+  sigma: 0.4271
+lead_time:
+  kind: deterministic
+  lead_time: 3
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

@@ -1,0 +1,60 @@
+# Reference Lumpy pattern scenario (closes the pattern set).
+# Reproduces with: python -m inventory_twin.cli run --config data/scenarios/example_pattern_lumpy.yaml
+#
+# Bernoulli burst-mask lumpiness on top of the Normal demand baseline:
+#   apply(base, t) = base * 5.0   with probability 0.3   (a burst period)
+#   apply(base, t) = 0.0           otherwise              (a no-demand period)
+#   base(t) ~ Normal(10, 2)
+#
+# This is the colloquial "lumpy" shape: long no-demand gaps punctuated by
+# occasional large bursts (~5x base ~= 50 units). NOTE the higher mean: the
+# expected per-period demand is ~ p * m * base_mean = 0.3 * 5 * 10 = 15, so this
+# is ALSO a higher-mean stress, not just "same demand, lumpier shape". For a
+# (roughly) mean-preserving lumpy variant use burst_multiplier ~= 1/p (~3.33
+# here); m=5.0 is chosen for a clear, severe demo.
+#
+# SB caveat: a constant burst multiplier amplifies the nonzero magnitudes but
+# does not by itself raise the CV-squared of the nonzero demand sizes, so this
+# Normal(10, 2) series may still classify as Syntetos-Boylan *intermittent*
+# rather than *lumpy* (true SB-lumpy needs high nonzero CV-squared, which
+# depends on the base distribution). This scenario is the colloquial lumpy
+# shape, not a guaranteed SB-lumpy series.
+#
+# Like Intermittent, the pattern overlay draws from the seeded "pattern"
+# stream, independent of the "demand" stream — so for this master_seed the burst
+# periods coincide exactly with the intermittent run's demand periods, with each
+# kept demand scaled by 5.0 (lumpy.demand == intermittent.demand * 5.0).
+#
+# Expected cost behavior vs example.yaml ($5,562.05 Stationary baseline): higher
+# — the (s,Q) policy at reorder_point=20, order_quantity=30 (sized for steady
+# mean-10 demand) is repeatedly blown through by ~50-unit bursts (stockouts)
+# while sitting idle between them (holding). The actual measured cost is observed.
+name: m2-pattern-lumpy-baseline
+notes: Bernoulli burst-mask lumpy pattern (occurrence_probability=0.3, burst_multiplier=5.0) on Normal(10, 2). ~70% no-demand periods, bursts ~5x base. Expected mean ~15 (higher-mean stress). Closes the M2 pattern set.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: normal
+  mean: 10.0
+  std: 2.0
+pattern:
+  kind: lumpy
+  occurrence_probability: 0.3
+  burst_multiplier: 5.0
+lead_time:
+  kind: deterministic
+  lead_time: 3
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

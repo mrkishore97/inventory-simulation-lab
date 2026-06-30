@@ -1,0 +1,52 @@
+# Reference Intermittent pattern scenario.
+# Reproduces with: python -m inventory_twin.cli run --config data/scenarios/example_pattern_intermittent.yaml
+#
+# Bernoulli zero-mask intermittency on top of the Normal demand baseline:
+#   apply(base, t) = base   with probability 0.6   (a demand period)
+#   apply(base, t) = 0.0     otherwise              (a no-demand period)
+#   base(t) ~ Normal(10, 2)
+#
+# Expected average demand interval ADI ~= 1 / 0.6 ~= 1.67 periods — intended to
+# create intermittent arrivals (before finite-sample effects). The realized SB
+# quadrant also depends on the CV-squared of the nonzero demand sizes, so this
+# is the intent, not a guaranteed classification.
+#
+# The pattern overlay draws from the seeded "pattern" RNG stream, which is
+# independent of the "demand" stream — so for this master_seed the base draws
+# match the Stationary baseline (example.yaml) exactly, and this scenario's
+# demand is that same sequence with ~40% of periods masked to zero.
+#
+# Expected cost behavior vs example.yaml ($5,562.05 Stationary baseline):
+# lower total realized demand (~60% of periods active) means fewer units to buy
+# and hold and fewer reorder triggers, but the (s,Q) policy at reorder_point=20,
+# order_quantity=30 — sized for the always-on mean-10 process — now sees long
+# zero-demand gaps punctuated by clustered demand, a classic slow-mover policy
+# mismatch. The actual measured cost is observed.
+name: m2-pattern-intermittent-baseline
+notes: Bernoulli zero-mask intermittent pattern (occurrence_probability=0.6) on Normal(10, 2). ~40% no-demand periods; expected ADI ~= 1.67. First stochastic pattern arm.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: normal
+  mean: 10.0
+  std: 2.0
+pattern:
+  kind: intermittent
+  occurrence_probability: 0.6
+lead_time:
+  kind: deterministic
+  lead_time: 3
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

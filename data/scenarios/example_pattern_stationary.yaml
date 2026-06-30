@@ -1,0 +1,42 @@
+# Reference scenario for the Pattern Engine chassis.
+# Reproduces with: python -m inventory_twin.cli run --config data/scenarios/example_pattern_stationary.yaml
+#
+# This scenario is byte-for-byte equivalent to ``example.yaml`` at the
+# demand-stream level: it carries an EXPLICIT ``pattern: {kind: stationary}``
+# block where ``example.yaml`` omits it. Because ``RunConfig.pattern`` is
+# defaulted via ``Field(default_factory=lambda: StationaryPatternConfig())``,
+# the two scenarios resolve to the same Pydantic model after validation,
+# produce identical canonical-JSON hashes, identical Ledger columns, and
+# identical total cost. The ``pattern_stationary`` smoke is the explicit
+# documentation that the chassis is wired and that the default-factory
+# branch produces the same output as the explicit-default branch.
+#
+# Future scenarios (``example_pattern_seasonal.yaml``,
+# ``example_pattern_trending.yaml``, etc.) land alongside this file.
+name: m2-pattern-stationary-baseline
+notes: Explicit Stationary (identity) pattern overlay; byte-equivalent to example.yaml. Demonstrates the M2 Bullet 10 chassis schema.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: normal
+  mean: 10.0
+  std: 2.0
+pattern:
+  kind: stationary
+lead_time:
+  kind: deterministic
+  lead_time: 3
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

@@ -1,0 +1,52 @@
+# Reference Seasonal pattern scenario.
+# Reproduces with: python -m inventory_twin.cli run --config data/scenarios/example_pattern_seasonal.yaml
+#
+# Sinusoidal multiplicative seasonality on top of the Normal demand baseline:
+#   factor(t) = 1 + 0.5 * sin(2π·t / 12)
+#   demand(t) = base(t) * factor(t)  where base(t) ~ Normal(10, 2)
+#
+# Factor range: [0.5, 1.5] (inclusive of endpoints at sin = ±1).
+# Demand range at typical base values: roughly [2.5, 22.5] (very rough; varies
+# with the Normal noise).
+# Cycle: period=12, so the 90-period horizon traverses 7.5 full cycles.
+# Mean preservation: sin averages to 0 over [0, 2π], so the time-averaged
+# demand mean equals base mean = 10.0.
+#
+# Expected cost behavior vs example.yaml ($5,562.05 Stationary baseline):
+# notably higher cost. The (s,Q) policy at reorder_point=20, order_quantity=30
+# was designed for the marginal demand (mean=10, std=2). During seasonal peaks
+# (factor=1.5), demand rate is 1.5× the policy's design assumption → policy
+# under-orders → stockouts. During troughs (factor=0.5), demand is 0.5× the
+# design → policy over-orders → inventory pile-up. Same time-averaged mean,
+# but the policy is wrong-by-significant-margins for the time-conditional
+# demand process. The actual measured cost is observed.
+name: m2-pattern-seasonal-baseline
+notes: Sinusoidal multiplicative seasonal pattern (amplitude=0.5, period=12, phase=0) on Normal(10, 2). 7.5 cycles over 90 periods. Mean preserved; canonical (s,Q) policy mismatch failure mode.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: normal
+  mean: 10.0
+  std: 2.0
+pattern:
+  kind: seasonal
+  amplitude: 0.5
+  period: 12
+  phase: 0.0
+lead_time:
+  kind: deterministic
+  lead_time: 3
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

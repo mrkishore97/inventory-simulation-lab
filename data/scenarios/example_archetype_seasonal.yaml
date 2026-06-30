@@ -1,0 +1,47 @@
+# Reference scenario — M5 archetype "highly seasonal".
+# Reproduce: python -m inventory_twin.cli run --config data/scenarios/example_archetype_seasonal.yaml
+#
+# Empirical (IID resample) demand on a REAL Walmart M5 SKU curated as the
+# highly-seasonal archetype (selected by max weekly/yearly autocorrelation —
+# strong recurring time structure). Exact source SKU + its computed
+# seasonal-strength and SB quadrant are in data/m5/archetypes_manifest.json.
+# (Seasonality is orthogonal to the CV2/ADI axes, so the SB quadrant is recorded
+# rather than assumed.)
+#
+# ** IID-marginal caveat — IMPORTANT for this archetype ** draw() =
+# rng.choice(history) DESTROYS temporal ordering, so the seasonal wave is LOST:
+# this scenario exercises only the SKU's MARGINAL demand distribution (a wider,
+# fatter-tailed histogram than a smooth SKU). To exercise IN-TIME seasonality,
+# compose a SeasonalPattern on top of this empirical demand (the Pattern axis is
+# orthogonal and composes via the engine's _draw_demand shim). This scenario
+# does NOT do that composition — it is the marginal-replay baseline.
+#
+# Shares the (s,Q) fixture of example.yaml so the M5 cost axis varies only the
+# demand source. Real demand scale may differ from the mean-10 fixtures.
+#
+# Path resolved relative to CWD (run from repo root). Hash includes history_path
+# but not file contents; treat the bundled parquet as immutable.
+name: m2-bullet16-archetype-seasonal
+notes: Real M5 highly-seasonal archetype (selected by seasonal-strength; SB quadrant recorded in manifest), IID-resampled. IID replay LOSES the seasonal wave and keeps only the marginal — compose a SeasonalPattern for in-time seasonality. The shared (s, Q) = (20, 30) baseline is untuned, so its cost is illustrative rather than representative — tune with the Policy Advisor or Pareto Explorer.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: empirical
+  history_path: data/m5/archetype_seasonal.parquet
+lead_time:
+  kind: deterministic
+  lead_time: 3
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0

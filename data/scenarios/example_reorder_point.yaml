@@ -1,0 +1,32 @@
+# Reorder-point validation anchor.
+# Deterministic demand μ=10.3, σ=0, lead time L=4. With no demand variability
+# (z=0, σ=0) the reorder point is pure cycle stock:
+#   s = μL + z·σ·√L = 10.3·4 + 0 = 41.2.
+# tests/validation/test_reorder_point.py confirms the simulator's on-hand floor
+# sits at s − μL (so μL units are consumed during the lead time) and stockouts
+# begin just below μL. This scenario is the knife-edge s = μL anchor.
+name: reorder-point-validation
+notes: Deterministic (s,Q) at the cycle-stock reorder point s = μL = 41.2 — §11 validation anchor.
+master_seed: 42
+simulation:
+  horizon: 365
+  initial_on_hand: 120
+  initial_on_order: 0
+  backorder_policy: lost_sales
+demand:
+  kind: normal
+  mean: 10.3
+  std: 0.0
+lead_time:
+  kind: deterministic
+  lead_time: 4
+policy:
+  kind: sQ
+  reorder_point: 41.2
+  order_quantity: 60
+costs:
+  unit_cost: 0.0
+  holding_per_unit_per_period: 1.0
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 0.0
+  lost_sale_per_unit: 10.0

@@ -1,0 +1,49 @@
+# Built-in stress scenario — Supplier Outage.
+# Same world as example.yaml ($5,562.05 baseline) plus a single scheduled
+# lead-time disruption modeling the "lead time becomes infinite for 3 weeks"
+# outage.
+#
+# IMPORTANT — effective (not true) infinite lead time: the engine does not
+# support an infinite lead time, so this preset represents the outage with a very
+# large FINITE multiplier (50.0), turning L=3 into round_to_periods(3 * 50.0) =
+# 150 during the outage window [30, 51) (~3 weeks = 21 periods). For this
+# 90-period run, any order placed during that window arrives at t+150 >> 90, so
+# no replenishment lands before the simulation ends — an effective outage.
+#
+# Teaching nuance: the (s,Q) policy keeps placing orders while inventory drains
+# (IP falls below s), but none of those in-window orders arrive, so on-hand goes
+# to zero and backorders accumulate until the window ends and a post-window order
+# (normal L=3) finally arrives. Cost is far above the baseline.
+# Reproduces with:
+#   python -m inventory_twin.cli run --config data/scenarios/supplier_outage.yaml
+name: stress-supplier-outage
+notes: Effective supplier outage via a large finite lead-time multiplier (x50, L=3 -> ~150) over periods 30-50, so in-window orders never arrive in a 90-period run. The §5.5 "supplier outage" stress test.
+master_seed: 42
+simulation:
+  horizon: 90
+  initial_on_hand: 100
+  initial_on_order: 0
+  backorder_policy: backorder
+demand:
+  kind: normal
+  mean: 10.0
+  std: 2.0
+lead_time:
+  kind: deterministic
+  lead_time: 3
+disruption:
+  kind: scheduled
+  windows:
+    - start: 30
+      duration: 21
+      multiplier: 50.0
+policy:
+  kind: sQ
+  reorder_point: 20.0
+  order_quantity: 30
+costs:
+  unit_cost: 5.0
+  holding_per_unit_per_period: 0.5
+  ordering_fixed: 20.0
+  backorder_per_unit_per_period: 2.0
+  lost_sale_per_unit: 0.0
